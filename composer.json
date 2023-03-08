@@ -1,0 +1,13 @@
+{
+    "name": "root/html",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {
+        "swaggest/json-schema": "^0.12.41",
+        "vlucas/phpdotenv": "^5.5"
+    }
+}

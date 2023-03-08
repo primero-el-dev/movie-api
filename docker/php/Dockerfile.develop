@@ -1,0 +1,51 @@
+FROM php:8.1-fpm
+
+RUN apt-get update && apt-get install -y \
+        php8.0-common \
+        libzip-dev \
+        libssl-dev \
+        librabbitmq-dev \
+        libicu-dev \
+        zip \
+        unzip \
+        nodejs \
+        yarn -y && rm -r /var/lib/apt/lists/*
+
+RUN docker-php-ext-install pdo pdo_mysql zip intl
+RUN docker-php-ext-install sysvsem
+RUN docker-php-ext-enable amqp
+RUN docker-php-ext-install pecl install xdebug-2.9.8
+RUN docker-php-ext-enable xdebug
+
+RUN echo "zend_extension=xdebug.so" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_connect_back=on" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_host=10.14.0.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_port=9009" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.client_host=localhost" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.profiler_enable_trigger=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.profiler_enable=0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.profiler_output_dir'/logs/xdebug'" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.var_display_max_children=-1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.var_display_max_data=-1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.var_display_max_depth=-1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+RUN echo "memory_limit=-1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+ARG TZ=Europe/Warsaw
+ENV TZ ${TZ}
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN usermod -u 1000 www-data && groupmod -g 1000 www-data
+RUN curl --insecure https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+COPY symfony.sh /usr/local/bin/_symfony
+COPY composer.sh /usr/local/bin/_composer
+COPY ./php.ini /usr/local/etc/php/conf.d/php.ini
+COPY ./www.conf /usr/local/etc/php-fpm.d/www.conf
+
+RUN chmod +x /usr/local/bin/_symfony
+RUN chmod +x /usr/local/bin/_composer
