@@ -201,7 +201,6 @@ if (php_sapi_name() !== 'cli') {
         echo json_encode(['error' => $e->getMessage()]);
     }
     catch (Exception $e) {
-        de($e);
         header('Content-Type: application/json');
         echo json_encode(['error' => $e->getMessage()]);
     }
