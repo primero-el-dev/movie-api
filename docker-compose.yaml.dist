@@ -38,7 +38,7 @@ services:
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - "/path/dop/database/toeu_abonament_db:/var/lib/mysql"
+      - "/path/dop/database/db:/var/lib/mysql"
     networks:
       network:
         ipv4_address: 10.11.0.2
